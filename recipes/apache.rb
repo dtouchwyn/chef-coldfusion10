@@ -48,6 +48,16 @@ execute "install_wsconfig" do
       cp -f #{node['apache']['dir']}/conf/mod_jk.conf #{node['apache']['dir']}/conf.d/mod_jk.conf
       sleep 11
       COMMAND
+    when "debian"
+      command <<-COMMAND
+      sleep 11
+      #{node['cf10']['installer']['install_folder']}/cfusion/runtime/bin/wsconfig -ws Apache -dir #{node['apache']['dir']} -bin #{node['apache']['binary']} -script /usr/sbin/apachectl -v
+      rm -f #{node['apache']['dir']}/httpd.conf.1
+      rm -f #{node['apache']['dir']}/httpd.conf
+      mv #{node['apache']['dir']}/mod_jk.conf #{node['apache']['dir']}/conf-available/mod_jk.conf
+      /usr/sbin/a2enconf mod_jk
+      sleep 11
+      COMMAND
     else
       command <<-COMMAND
       sleep 11
@@ -70,6 +80,14 @@ execute "uninstall_wsconfig" do
       #{node['cf10']['installer']['install_folder']}/cfusion/runtime/bin/wsconfig -uninstall -bin #{node['apache']['binary']} -script /usr/sbin/apachectl -v
       rm -f #{node['apache']['dir']}/conf/httpd.conf.1 
       rm -f #{node['apache']['dir']}/conf.d/mod_jk.conf
+      sleep 11
+      COMMAND
+    when "debian"
+      command <<-COMMAND
+      sleep 11
+      #{node['cf10']['installer']['install_folder']}/cfusion/runtime/bin/wsconfig -uninstall -bin #{node['apache']['binary']} -script /usr/sbin/apache2ctl -v
+      /usr/sbin/a2enconf mod_jk
+      rm -f #{node['apache']['dir']}/conf-available/mod_jk.conf
       sleep 11
       COMMAND
     else
